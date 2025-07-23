@@ -1,0 +1,311 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Trading System Specific
+# ======================
+
+# Configuration files with secrets
+config.local.yaml
+config.production.yaml
+.secrets/
+secrets.yaml
+api_keys.yaml
+
+# Data files
+data/
+*.csv
+*.h5
+*.hdf5
+*.parquet
+*.feather
+market_data/
+historical_data/
+tick_data/
+
+# Logs
+logs/
+*.log
+trading.log
+error.log
+debug.log
+
+# Backtest results
+backtest_results/
+results/
+reports/
+backtests/
+
+# Cache files
+cache/
+.cache/
+*.cache
+data_cache/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+trading.db
+
+# Model files
+models/
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.pb
+*.onnx
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# IDE specific files
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Broker specific
+# MetaTrader
+*.ex4
+*.ex5
+*.mq4
+*.mq5
+MQL4/
+MQL5/
+
+# Interactive Brokers
+*.tws
+tws_logs/
+
+# Binance/Exchange API logs
+exchange_logs/
+
+# Performance monitoring
+profiling/
+*.prof
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Kubernetes
+k8s-secrets/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Research notebooks (exclude from production)
+research/*.ipynb
+notebooks/*.ipynb
+analysis/*.ipynb
+
+# Large data files
+*.zip
+*.gz
+*.tar
+*.rar
+*.7z
+
+# Specific to TrendStack
+# =====================
+# Local configuration overrides
+config.local.yaml
+local_config.yaml
+
+# Trading position files
+positions/
+portfolio_state.json
+
+# Order management
+orders/
+order_history/
+
+# Risk management logs
+risk_logs/
+alerts/
+
+# Performance metrics
+metrics/
+performance/
+
+# Live trading state
+live_state/
+trading_state.json
+
+# Paper trading data
+paper_trading/
+simulation/
+
+# Strategy specific data
+strategies/*/data/
+strategies/*/cache/
+strategies/*/logs/
+
+# Research and development
+research/data/
+research/cache/
+research/models/
+research/experiments/
+
+# Monitoring and alerting
+monitoring/data/
+alerts.json
+notifications/
+
+# External dependencies source
+vendor/
+third_party/
+
+# Compiled strategy files
+*.pyc
+strategies/*.pyc
+
+# Lock files for data processing
+*.lock
+data.lock
+processing.lock

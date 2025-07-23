@@ -1,0 +1,210 @@
+# TrendStack Configuration
+# WARNING: Do NOT commit secrets to version control
+# Copy this file to config.yaml and customize for your environment
+
+# System Settings
+system:
+  environment: "development"  # development, staging, production
+  log_level: "INFO"          # DEBUG, INFO, WARNING, ERROR
+  timezone: "UTC"
+  
+# Data Sources
+data:
+  primary_source: "yfinance"
+  backup_source: "yahoo"
+  data_path: "./data/"
+  cache_enabled: true
+  cache_duration_hours: 24
+  
+  # Market data symbols
+  symbols:
+    - "EURUSD=X"
+    - "GBPUSD=X" 
+    - "USDJPY=X"
+    - "AUDUSD=X"
+    - "USDCAD=X"
+    
+  # Data quality settings
+  quality:
+    fill_gaps: true
+    remove_outliers: true
+    outlier_threshold: 5.0  # standard deviations
+    min_data_points: 252    # trading days
+
+# Trading Configuration
+trading:
+  mode: "paper"              # paper, live
+  broker: "mt5"              # mt5, interactive_brokers
+  
+  # Position sizing
+  sizing:
+    method: "volatility_parity"  # fixed, volatility_parity, kelly
+    base_capital: 100000.0
+    max_leverage: 2.0
+    min_position_size: 0.01
+    max_position_size: 0.1
+    
+  # Execution settings
+  execution:
+    order_type: "market"     # market, limit
+    slippage_bps: 2.0        # basis points
+    max_order_size: 1000000  # in base currency
+    timeout_seconds: 30
+
+# Risk Management
+risk:
+  # Portfolio level limits
+  portfolio:
+    max_drawdown_pct: 15.0   # Maximum allowed drawdown
+    var_confidence: 0.05     # VaR confidence level (5%)
+    var_horizon_days: 1      # VaR time horizon
+    max_correlation: 0.7     # Maximum position correlation
+    
+  # Position level limits  
+  position:
+    max_single_position_pct: 20.0  # Max % of portfolio per position
+    stop_loss_pct: 5.0             # Stop loss percentage
+    take_profit_pct: 15.0          # Take profit percentage
+    
+  # Circuit breakers
+  circuit_breakers:
+    daily_loss_limit_pct: 3.0      # Daily loss limit
+    weekly_loss_limit_pct: 8.0     # Weekly loss limit
+    consecutive_losses: 5          # Max consecutive losing trades
+
+# Strategy Parameters
+strategies:
+  momentum:
+    enabled: true
+    lookback_periods: [21, 63, 252]  # days
+    rebalance_frequency: "weekly"    # daily, weekly, monthly
+    min_momentum_threshold: 0.02     # minimum momentum score
+    
+  carry:
+    enabled: false
+    yield_source: "fred"           # data source for rates
+    min_carry_threshold: 0.01      # minimum carry score
+    
+  filters:
+    volatility:
+      enabled: true
+      lookback: 21               # volatility calculation period
+      threshold: 0.8             # relative volatility threshold
+    
+    trend:
+      enabled: true
+      ema_periods: [20, 50]      # EMA periods for trend filter
+
+# Broker Configurations
+brokers:
+  mt5:
+    # DO NOT COMMIT THESE VALUES - Use environment variables
+    server: "YOUR_MT5_SERVER"
+    login: 0  # Your MT5 account number
+    password: ""  # Use environment variable MT5_PASSWORD
+    path: "C:/Program Files/MetaTrader 5/terminal64.exe"
+    
+  interactive_brokers:
+    host: "127.0.0.1"
+    port: 7497
+    client_id: 1
+    account: ""  # Use environment variable IB_ACCOUNT
+
+# Monitoring & Alerts
+monitoring:
+  enabled: true
+  update_frequency_seconds: 60
+  
+  # Performance metrics
+  metrics:
+    calculate_sharpe: true
+    calculate_sortino: true
+    calculate_calmar: true
+    benchmark_symbol: "SPY"
+    
+  # Dashboard settings
+  dashboard:
+    enabled: true
+    host: "0.0.0.0"
+    port: 8050
+    auto_refresh_seconds: 30
+    
+# Alert Configuration
+alerts:
+  telegram:
+    enabled: false
+    bot_token: ""  # Use environment variable TELEGRAM_BOT_TOKEN
+    chat_id: ""    # Use environment variable TELEGRAM_CHAT_ID
+    
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    username: ""   # Use environment variable EMAIL_USERNAME
+    password: ""   # Use environment variable EMAIL_PASSWORD
+    
+  # Alert triggers
+  triggers:
+    drawdown_threshold_pct: 5.0    # Alert on drawdown > 5%
+    profit_threshold_pct: 10.0     # Alert on profit > 10%
+    position_size_threshold_pct: 15.0  # Alert on large positions
+    system_errors: true           # Alert on system errors
+
+# Backtesting Settings
+backtesting:
+  initial_capital: 100000.0
+  commission_pct: 0.01          # 0.01% commission
+  slippage_bps: 1.0            # 1 basis point slippage
+  
+  # Analysis settings
+  analysis:
+    benchmark: "SPY"
+    risk_free_rate: 0.02         # 2% annual risk-free rate
+    confidence_intervals: [0.95, 0.99]
+    monte_carlo_runs: 1000
+
+# Database Configuration  
+database:
+  type: "sqlite"               # sqlite, postgresql, mysql
+  path: "./data/trendstack.db"
+  
+  # For PostgreSQL/MySQL
+  host: "localhost"
+  port: 5432
+  name: "trendstack"
+  username: ""  # Use environment variable DB_USERNAME
+  password: ""  # Use environment variable DB_PASSWORD
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # File logging
+  file:
+    enabled: true
+    path: "./logs/"
+    max_size_mb: 100
+    backup_count: 5
+    
+  # Console logging
+  console:
+    enabled: true
+    colored: true
+
+# Development Settings
+development:
+  debug_mode: false
+  profiling_enabled: false
+  mock_broker: true           # Use mock broker for testing
+  fast_mode: false           # Skip some validations for faster testing
+
+# Environment Variables (Reference)
+# Set these in your environment, not in this file:
+# - MT5_PASSWORD: MetaTrader 5 password
+# - TELEGRAM_BOT_TOKEN: Telegram bot token
+# - TELEGRAM_CHAT_ID: Telegram chat ID
+# - EMAIL_USERNAME: Email username for alerts
+# - EMAIL_PASSWORD: Email password for alerts
+# - DB_USERNAME: Database username
+# - DB_PASSWORD: Database password
