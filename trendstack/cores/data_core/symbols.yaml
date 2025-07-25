@@ -1,0 +1,22 @@
+# Symbol definitions and sources
+# symbol: source mapping
+
+EURUSD=X: yfinance
+GBPUSD=X: yfinance  
+USDJPY=X: yfinance
+AUDUSD=X: yfinance
+USDCAD=X: yfinance
+EURGBP=X: yfinance
+EURJPY=X: yfinance
+GBPJPY=X: yfinance
+
+# Equities
+SPY: yfinance
+QQQ: yfinance
+IWM: yfinance
+VTI: yfinance
+
+# Commodities  
+GC=F: yfinance  # Gold
+CL=F: yfinance  # Crude Oil
+SI=F: yfinance  # Silver

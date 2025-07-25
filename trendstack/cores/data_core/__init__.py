@@ -1,18 +1,26 @@
 """
-TrendStack Data Core - Market Data Pipeline
+TrendStack Data Core - Simple and Effective
 
-This module handles market data ingestion, cleaning, and preprocessing
-for the TrendStack algorithmic trading system.
+Design: retrieve data -> clean data -> store data -> give data when asked
 
-Modules:
-- ingestion: Download and append raw market data
-- cleaner: Gap filling, outlier removal, and roll adjustments  
-- costs: Trading cost calculations (spreads, commissions, swaps)
+Public API (use this):
+- load_prices(symbol, frame="D", start=None, end=None) -> DataFrame
+- load_costs(symbol) -> CostSpec  
+- refresh_symbol(symbol, source=None) -> None
+- list_symbols() -> Dict[str, str]
+
+Data maintenance runs independently to keep all data fresh.
 """
 
-from .ingestion import DataIngestion
-from .cleaner import DataCleaner
-from .costs import CostCalculator
+# Simple API exports
+from .api import load_prices, load_costs, refresh_symbol, list_symbols, CostSpec, Frame
 
-__all__ = ['DataIngestion', 'DataCleaner', 'CostCalculator']
-__version__ = '0.1.0'
+__all__ = [
+    'load_prices', 
+    'load_costs', 
+    'refresh_symbol', 
+    'list_symbols',
+    'CostSpec',
+    'Frame'
+]
+__version__ = '1.0.0'

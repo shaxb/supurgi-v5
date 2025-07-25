@@ -1,0 +1,14 @@
+# Data Core Configuration - Simple and Effective
+
+# Data storage
+data_path: "./data/"
+default_history_years: 5
+
+# Update intervals  
+update_interval_hours: 24  # how often to check for new data
+cleanup_interval_days: 7   # how often to clean old raw files
+
+# Data quality
+fill_gaps: true
+remove_outliers: true
+outlier_threshold: 5.0  # standard deviations

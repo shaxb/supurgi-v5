@@ -1,0 +1,95 @@
+# Trading costs by symbol
+# All costs in USD unless specified
+
+# Forex (spreads in price units, others $/lot)
+EURUSD=X:
+  spread: 0.00015     # 1.5 pips
+  commission: 7.0     # $/lot/side  
+  swap_long: -2.5     # $/lot/day
+  swap_short: 1.8
+
+GBPUSD=X:
+  spread: 0.00020     # 2.0 pips
+  commission: 7.0
+  swap_long: -3.2
+  swap_short: 2.1
+
+USDJPY=X:
+  spread: 0.015       # 1.5 pips
+  commission: 7.0
+  swap_long: 1.2
+  swap_short: -2.8
+
+AUDUSD=X:
+  spread: 0.00025     # 2.5 pips
+  commission: 7.0
+  swap_long: -1.8
+  swap_short: 1.3
+
+USDCAD=X:
+  spread: 0.00025     # 2.5 pips
+  commission: 7.0
+  swap_long: 0.8
+  swap_short: -1.5
+
+EURGBP=X:
+  spread: 0.00030     # 3.0 pips
+  commission: 7.0
+  swap_long: -1.2
+  swap_short: 0.9
+
+EURJPY=X:
+  spread: 0.025       # 2.5 pips
+  commission: 7.0
+  swap_long: -0.8
+  swap_short: 0.3
+
+GBPJPY=X:
+  spread: 0.035       # 3.5 pips
+  commission: 7.0
+  swap_long: -1.5
+  swap_short: 0.8
+
+# Equities (commission as % of notional)
+SPY:
+  spread: 0.01        # $0.01
+  commission: 0.001   # 0.1% of notional
+  swap_long: 0.0
+  swap_short: 0.0
+
+QQQ:
+  spread: 0.01
+  commission: 0.001
+  swap_long: 0.0
+  swap_short: 0.0
+
+IWM:
+  spread: 0.02
+  commission: 0.001
+  swap_long: 0.0
+  swap_short: 0.0
+
+VTI:
+  spread: 0.01
+  commission: 0.001
+  swap_long: 0.0
+  swap_short: 0.0
+
+# Commodities
+GC=F:  # Gold
+  spread: 0.50        # $0.50/oz
+  commission: 2.50    # $/contract/side
+  swap_long: 0.0
+  swap_short: 0.0
+
+CL=F:  # Crude Oil
+  spread: 0.02        # $0.02/barrel
+  commission: 3.00    # $/contract/side
+  swap_long: 0.0
+  swap_short: 0.0
+
+SI=F:  # Silver
+  spread: 0.005       # $0.005/oz
+  commission: 2.50    # $/contract/side
+  swap_long: 0.0
+  swap_short: 0.0

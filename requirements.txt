@@ -20,7 +20,7 @@ asyncpg==0.30.0
 attrs==25.3.0
 backtrader==1.9.78.123
 beautifulsoup4==4.13.4
-cachetools==6.1.0
+cachetools>=4.2.2,<7.0
 certifi==2025.7.14
 cffi==1.17.1
 charset-normalizer==3.4.2
@@ -93,7 +93,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 python-slugify==8.0.4
 python-socks==2.7.1
-python-telegram-bot==13.15
+python-telegram-bot>=20.0
 pytz==2025.2
 pywin32==311
 PyYAML==6.0.2

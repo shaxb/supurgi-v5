@@ -7,29 +7,6 @@ system:
   environment: "development"  # development, staging, production
   log_level: "INFO"          # DEBUG, INFO, WARNING, ERROR
   timezone: "UTC"
-  
-# Data Sources
-data:
-  primary_source: "yfinance"
-  backup_source: "yahoo"
-  data_path: "./data/"
-  cache_enabled: true
-  cache_duration_hours: 24
-  
-  # Market data symbols
-  symbols:
-    - "EURUSD=X"
-    - "GBPUSD=X" 
-    - "USDJPY=X"
-    - "AUDUSD=X"
-    - "USDCAD=X"
-    
-  # Data quality settings
-  quality:
-    fill_gaps: true
-    remove_outliers: true
-    outlier_threshold: 5.0  # standard deviations
-    min_data_points: 252    # trading days
 
 # Trading Configuration
 trading:
