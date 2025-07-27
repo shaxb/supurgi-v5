@@ -27,57 +27,96 @@ _costs_path = Path(__file__).parent / "costs.yaml"
 with open(_costs_path) as f:
     COSTS = yaml.safe_load(f)
 
-def get_cleaned_data(symbol: str, frame: Frame = "D", 
-                    start: Optional[str] = None, 
-                    end: Optional[str] = None) -> pd.DataFrame:
-    """Return cleaned OHLCV data."""
+def get_data(symbol: str, frame: Frame = "D", 
+             start: Optional[str] = None, 
+             end: Optional[str] = None) -> pd.DataFrame:
+    """Smart data loader - gets exactly what you need, when you need it.
     
-    # Check if processed file exists
+    Automatically handles:
+    - Checking if data exists for the requested range
+    - Downloading only missing data
+    - Cleaning and caching data
+    - Returning the exact range requested
+    """
+    
     processed_file = DATA_PATH / "processed" / f"{symbol.replace('=', '_')}_{frame}.parquet"
     
+    # Load existing data if available
+    existing_data = pd.DataFrame()
     if processed_file.exists():
-        logger.info(f"📁 Using cached data for {symbol} from {processed_file}")
-        data = pd.read_parquet(processed_file)
+        existing_data = pd.read_parquet(processed_file)
+        logger.info(f"📁 Found cached data for {symbol}: {len(existing_data)} bars")
+    
+    # Determine what data we need
+    if start is None and end is None:
+        # No specific range - need all data up to today
+        needed_start = None
+        needed_end = pd.Timestamp.now().strftime('%Y-%m-%d')
+    else:
+        needed_start = start
+        needed_end = end
+    
+    # Check if we have the needed data
+    needs_update = False
+    
+    if existing_data.empty:
+        logger.info(f"📥 No data for {symbol}, downloading...")
+        needs_update = True
+    else:
+        # Check if requested range is covered
+        data_start = existing_data.index[0]
+        data_end = existing_data.index[-1]
         
-        # Filter by date range if provided
-        if start or end:
-            original_len = len(data)
-            if start:
-                data = data[data.index >= start]
-            if end:
-                data = data[data.index <= end]
-            logger.info(f"🔍 Filtered data: {original_len} -> {len(data)} bars")
+        # Remove timezone for comparison
+        if hasattr(data_start, 'tz') and data_start.tz is not None:
+            data_start = data_start.tz_localize(None)
+        if hasattr(data_end, 'tz') and data_end.tz is not None:
+            data_end = data_end.tz_localize(None)
         
-        return data
+        # Check if we need more recent data
+        if needed_end:
+            requested_end = pd.Timestamp(needed_end)
+            if data_end < requested_end:
+                logger.info(f"� Need newer data: have until {data_end.date()}, need until {requested_end.date()}")
+                needs_update = True
+        
+        # Check if we need older data  
+        if needed_start:
+            requested_start = pd.Timestamp(needed_start)
+            if data_start > requested_start:
+                logger.info(f"� Need older data: have from {data_start.date()}, need from {requested_start.date()}")
+                needs_update = True
     
-    # If no processed file, create it
-    logger.info(f"📥 No cached data found for {symbol}, downloading...")
-    refresh_data(symbol)
+    # Update data if needed
+    if needs_update:
+        refresh_data(symbol, frame)
+        if processed_file.exists():
+            existing_data = pd.read_parquet(processed_file)
+            logger.info(f"✅ Updated data for {symbol}: {len(existing_data)} bars")
     
-    # Try again
-    if processed_file.exists():
-        data = pd.read_parquet(processed_file)
+    # Filter to requested range
+    if not existing_data.empty:
+        if start:
+            existing_data = existing_data[existing_data.index >= start]
+        if end:
+            existing_data = existing_data[existing_data.index <= end]
+        
         if start or end:
-            if start:
-                data = data[data.index >= start]
-            if end:
-                data = data[data.index <= end]
-        return data
+            logger.info(f"🔍 Filtered to requested range: {len(existing_data)} bars")
     
-    # Return empty if still nothing
-    return pd.DataFrame()
+    return existing_data
 
-def refresh_data(symbol: str, source: Optional[str] = None) -> None:
-    """Incrementally update data - only download missing tail."""
+def refresh_data(symbol: str, frame: Frame = "D", source: Optional[str] = None) -> None:
+    """Smart data updater - only downloads what's missing."""
     
     if source is None:
         source = SYMBOLS.get(symbol, "yfinance")
     
     # File paths
-    raw_file = DATA_PATH / "raw" / f"{symbol.replace('=', '_')}.parquet"
-    processed_file = DATA_PATH / "processed" / f"{symbol.replace('=', '_')}_D.parquet"
+    raw_file = DATA_PATH / "raw" / f"{symbol.replace('=', '_')}_{frame}.parquet"
+    processed_file = DATA_PATH / "processed" / f"{symbol.replace('=', '_')}_{frame}.parquet"
     
-    logger.info(f"🔄 Refreshing data for {symbol}...")
+    logger.info(f"🔄 Refreshing data for {symbol} ({frame})...")
     
     # Check for existing raw data
     existing_raw = pd.DataFrame()
@@ -98,7 +137,7 @@ def refresh_data(symbol: str, source: Optional[str] = None) -> None:
         # Incremental: get only new data from last_date + 1
         start_date = (last_date + pd.Timedelta(days=1)).strftime('%Y-%m-%d')
         logger.info(f"📡 Downloading incremental data from {start_date}...")
-        new_data = download_raw_data(symbol, start=start_date)
+        new_data = download_raw_data(symbol, frame=frame, start=start_date)
         
         if not new_data.empty:
             # Append new data
@@ -113,7 +152,9 @@ def refresh_data(symbol: str, source: Optional[str] = None) -> None:
     else:
         # First time: download full history
         logger.info(f"📡 Downloading full history for {symbol}...")
-        combined_raw = download_raw_data(symbol, period="5y")
+        # Use shorter period for intraday data due to API limits
+        period = "60d" if frame in ["H4", "H1"] else "5y"
+        combined_raw = download_raw_data(symbol, frame=frame, period=period)
         if not combined_raw.empty:
             logger.info(f"📊 Downloaded full history for {symbol}: {len(combined_raw)} bars")
     
