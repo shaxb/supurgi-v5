@@ -9,6 +9,7 @@ USDCAD=X: yfinance
 EURGBP=X: yfinance
 EURJPY=X: yfinance
 GBPJPY=X: yfinance
+XAUUSD=X: yfinance
 
 # Equities
 SPY: yfinance

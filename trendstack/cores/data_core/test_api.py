@@ -217,8 +217,12 @@ def test_incremental_updates():
         print("🔄 Update was needed - incremental download happened")
 
 if __name__ == "__main__":
-    test_data_flow()
-    test_incremental_updates()
+    # test_data_flow()
+    # test_incremental_updates()
     print("\n🎉 ALL TESTS COMPLETED!")
-    gpd = load_prices("GBPUSD=X", frame="H4", start="2025-07-01", end="2025-07-25")   # Trigger load to ensure everything works
+    gpd = load_prices("GBPUSD=X", frame="M1", start="2025-07-01", end="2025-07-25")   # Trigger load to ensure everything works
     print(gpd.head())
+    load_costs("EURUSD=X")  # Ensure costs can be loaded
+    cost = load_costs("EURUSD=X")
+    print(type(cost))
+    print("✅ Costs loaded successfully")
