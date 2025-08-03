@@ -1,221 +1,110 @@
 """
-Signal Core Public API
-
-Main interface for signal generation used by orchestrator and backtesting systems.
+Signal Core API - Simple interface for orchestrator
 """
 
-from typing import List, Dict, Any, Optional, Type
+from typing import List, Dict, Any, Optional
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from loguru import logger
 
-from .datatypes import SignalIntent, StrategyConfig, SignalBuffer
+from .datatypes import SignalIntent, StrategyConfig
 from .registry import StrategyRegistry
+from .symbols import get_strategy_config
 
 
 # Global strategy registry
 _strategy_registry = StrategyRegistry()
 
+# Strategy cooldown tracking
+_strategy_cooldowns = {}
+
 
 def generate_signals(
     data: pd.DataFrame, 
-    strategy: str, 
-    params: Optional[Dict[str, Any]] = None,
-    symbol: str = "UNKNOWN"
-) -> List[SignalIntent]:
+    symbol: str,
+    strategy_instance: str,
+    force: bool = False
+) -> Optional[SignalIntent]:
     """
-    Generate trading signals using specified strategy.
+    Generate trading signal for orchestrator.
     
     Args:
-        data: OHLCV DataFrame with columns ['open', 'high', 'low', 'close', 'volume']
-        strategy: Name of registered strategy
-        params: Strategy parameters (optional)
-        symbol: Symbol identifier
+        data: OHLCV DataFrame with columns ['open', 'high', 'low', 'close']
+        symbol: Symbol identifier (e.g., 'AAPL', 'EURUSD')
+        strategy_instance: Strategy instance name (e.g., 'momentum_H4', 'momentum_D')
+        force: Skip cooldown check if True
         
     Returns:
-        List of SignalIntent objects
-        
-    Example:
-        >>> data = load_prices('AAPL')
-        >>> signals = generate_signals(data, 'momentum', {'period': 14})
+        Latest SignalIntent or None if no signal/on cooldown
     """
+    
+    # Extract base strategy name from instance (e.g., 'momentum_H4' -> 'momentum')
+    strategy = strategy_instance.split('_')[0]
+    
+    # Check strategy cooldown unless forced
+    if not force and _is_on_cooldown(strategy_instance, symbol):
+        return None
+    
     try:
         # Get strategy from registry
         strategy_class = _strategy_registry.get_strategy(strategy)
         if strategy_class is None:
-            raise ValueError(f"Strategy '{strategy}' not found. Available: {list_strategies()}")
+            logger.warning(f"Strategy '{strategy}' not found")
+            return None
         
-        # Create strategy config
-        config = StrategyConfig(
+        # Get config directly from symbols.yaml
+        symbol_config = get_strategy_config(symbol, strategy_instance)
+        
+        strategy_config = StrategyConfig(
             name=strategy,
-            parameters=params or {}
+            parameters=symbol_config
         )
         
-        # Initialize strategy
-        strategy_instance = strategy_class(config)
+        # Initialize and run strategy
+        strategy_instance_obj = strategy_class(strategy_config)
+        signals = strategy_instance_obj.generate_signals(data, symbol)
         
-        # Generate signals
-        signals = strategy_instance.generate_signals(data, symbol)
+        # Return only the latest signal (if any)
+        if signals:
+            latest_signal = signals[-1]  # Get newest signal
+            _update_cooldown(strategy_instance, symbol, strategy_instance_obj.get_cooldown())
+            logger.debug(f"Generated signal for {symbol} using {strategy_instance}")
+            return latest_signal
         
-        logger.info(f"Generated {len(signals)} signals using {strategy} strategy for {symbol}")
-        return signals
-        
-    except Exception as e:
-        logger.error(f"Error generating signals with {strategy}: {e}")
-        return []
-
-
-def register_strategy(name: str, strategy_class: Type) -> bool:
-    """
-    Register a new signal generation strategy.
-    
-    Args:
-        name: Strategy name for lookup
-        strategy_class: Strategy class implementing generate_signals method
-        
-    Returns:
-        True if registered successfully
-        
-    Example:
-        >>> register_strategy('my_strategy', MyStrategyClass)
-    """
-    try:
-        _strategy_registry.register(name, strategy_class)
-        logger.info(f"Registered strategy: {name}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to register strategy {name}: {e}")
-        return False
-
-
-def list_strategies() -> List[str]:
-    """
-    Get list of available strategy names.
-    
-    Returns:
-        List of registered strategy names
-    """
-    return _strategy_registry.list_strategies()
-
-
-def get_strategy_info(strategy_name: str) -> Optional[Dict[str, Any]]:
-    """
-    Get information about a registered strategy.
-    
-    Args:
-        strategy_name: Name of the strategy
-        
-    Returns:
-        Dictionary with strategy metadata or None if not found
-    """
-    return _strategy_registry.get_strategy_info(strategy_name)
-
-
-def create_signal_buffer(max_size: int = 1000) -> SignalBuffer:
-    """
-    Create a new signal buffer for collecting signals over time.
-    
-    Args:
-        max_size: Maximum number of signals to keep in buffer
-        
-    Returns:
-        SignalBuffer instance
-    """
-    return SignalBuffer(max_size)
-
-
-def batch_generate_signals(
-    data_dict: Dict[str, pd.DataFrame],
-    strategy: str,
-    params: Optional[Dict[str, Any]] = None
-) -> Dict[str, List[SignalIntent]]:
-    """
-    Generate signals for multiple symbols at once.
-    
-    Args:
-        data_dict: Dictionary mapping symbol -> OHLCV DataFrame
-        strategy: Strategy name
-        params: Strategy parameters
-        
-    Returns:
-        Dictionary mapping symbol -> List[SignalIntent]
-    """
-    results = {}
-    
-    for symbol, data in data_dict.items():
-        try:
-            signals = generate_signals(data, strategy, params, symbol)
-            results[symbol] = signals
-        except Exception as e:
-            logger.error(f"Failed to generate signals for {symbol}: {e}")
-            results[symbol] = []
-    
-    total_signals = sum(len(signals) for signals in results.values())
-    logger.info(f"Batch generated {total_signals} signals for {len(data_dict)} symbols")
-    
-    return results
-
-
-def validate_signal_data(data: pd.DataFrame) -> bool:
-    """
-    Validate that DataFrame has required columns for signal generation.
-    
-    Args:
-        data: OHLCV DataFrame
-        
-    Returns:
-        True if data is valid
-    """
-    required_columns = ['open', 'high', 'low', 'close']
-    
-    if not isinstance(data, pd.DataFrame):
-        logger.error("Data must be a pandas DataFrame")
-        return False
-    
-    if data.empty:
-        logger.error("Data DataFrame is empty")
-        return False
-    
-    missing_columns = [col for col in required_columns if col not in data.columns]
-    if missing_columns:
-        logger.error(f"Missing required columns: {missing_columns}")
-        return False
-    
-    # Check for NaN values in critical columns
-    for col in required_columns:
-        if data[col].isna().any():
-            logger.warning(f"Column '{col}' contains NaN values")
-    
-    return True
-
-
-# Convenience function for quick signal generation
-def quick_signals(symbol: str, timeframe: str = "D", strategy: str = "momentum") -> List[SignalIntent]:
-    """
-    Quick signal generation for a symbol using default parameters.
-    
-    Args:
-        symbol: Symbol to analyze
-        timeframe: Timeframe (D, H4, H1)
-        strategy: Strategy to use
-        
-    Returns:
-        List of signals
-    """
-    try:
-        # Import here to avoid circular imports
-        from ..data_core import load_prices
-        
-        # Load data
-        data = load_prices(symbol, frame=timeframe)
-        
-        if data.empty:
-            logger.warning(f"No data available for {symbol}")
-            return []
-        
-        # Generate signals
-        return generate_signals(data, strategy, symbol=symbol)
+        return None
         
     except Exception as e:
-        logger.error(f"Quick signal generation failed for {symbol}: {e}")
-        return []
+        logger.error(f"Signal generation failed for {symbol}: {e}")
+        return None
+
+
+def _is_on_cooldown(strategy: str, symbol: str) -> bool:
+    """Check if strategy is on cooldown for symbol."""
+    key = f"{strategy}_{symbol}"
+    if key not in _strategy_cooldowns:
+        return False
+    
+    cooldown_until = _strategy_cooldowns[key]
+    return datetime.now() < cooldown_until
+
+
+def _update_cooldown(strategy: str, symbol: str, cooldown_minutes: int):
+    """Update strategy cooldown for symbol."""
+    if cooldown_minutes > 0:
+        key = f"{strategy}_{symbol}"
+        _strategy_cooldowns[key] = datetime.now() + timedelta(minutes=cooldown_minutes)
+
+
+def get_available_strategies() -> List[str]:
+    """Get list of available strategy names."""
+    return [info['name'] for info in _strategy_registry.list_strategies()]
+
+
+def clear_cooldowns():
+    """Clear all strategy cooldowns - for testing/debugging."""
+    global _strategy_cooldowns
+    _strategy_cooldowns = {}
+
+
+# Expose symbols functions for orchestrator
+from .symbols import get_watchlist, get_symbol_strategies, get_strategy_timeframe, get_symbol_strategy_pairs, update_strategy_config

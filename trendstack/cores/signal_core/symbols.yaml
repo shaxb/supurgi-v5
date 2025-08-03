@@ -1,0 +1,62 @@
+# Symbols watchlist configuration for orchestrator
+# Format: symbol -> strategies -> strategy config with timeframe
+
+AAPL:
+  active: true
+  strategies:
+    momentum_H4:
+      timeframe: "H4"
+      rsi_period: 14
+      cooldown_minutes: 30
+    momentum_D:
+      timeframe: "D"
+      rsi_period: 20
+      cooldown_minutes: 60
+
+MSFT:
+  active: true
+  strategies:
+    momentum_H4:
+      timeframe: "H4"
+      rsi_period: 21
+      cooldown_minutes: 15
+
+TSLA:
+  active: true
+  strategies:
+    momentum_H1:
+      timeframe: "H1"
+      rsi_period: 8
+      cooldown_minutes: 5
+    momentum_H4:
+      timeframe: "H4"
+      rsi_period: 10
+      cooldown_minutes: 10
+
+EURUSD:
+  active: true
+  strategies:
+    momentum_H4:
+      timeframe: "H4"
+      rsi_period: 14
+      cooldown_minutes: 60
+    momentum_D:
+      timeframe: "D"
+      rsi_period: 21
+      cooldown_minutes: 120
+
+GBPUSD:
+  active: false  # Disabled
+  strategies:
+    momentum_H4:
+      timeframe: "H4"
+      rsi_period: 14
+      cooldown_minutes: 30
+
+SPY:
+  active: true
+  strategies:
+    momentum_D:
+      timeframe: "D"
+      rsi_period: 20
+      cooldown_minutes: 120  # Daily signals, longer cooldown

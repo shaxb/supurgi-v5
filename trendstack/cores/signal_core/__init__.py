@@ -1,33 +1,36 @@
 """
-Signal Core - Trading Signal Generation System
+Signal Core - Simple signal generation for orchestrator
 
-Core components:
-- Signal generation strategies (momentum, mean reversion, etc.)
-- Signal filtering and processing
-- Strategy plugin management
-- Signal intent data types
-
-Public API:
-- generate_signals(data, strategy, params) -> SignalIntent[]
-- register_strategy(name, strategy_class)
-- list_strategies() -> List[str]
+Main API:
+    generate_signals() - Generate signals with cooldown management
 """
 
-from .api import generate_signals, register_strategy, list_strategies
-from .datatypes import SignalIntent, SignalType, SignalStrength
-from .momentum import MomentumStrategy
-from .filters import EMAFilter, VolatilityRegimeFilter
+# Import strategies to trigger auto-registration
+from . import momentum
+
+# Public API - only expose what orchestrator needs
+from .api import generate_signals, get_available_strategies, clear_cooldowns, get_watchlist, get_symbol_strategies, get_strategy_timeframe, get_symbol_strategy_pairs, update_strategy_config
+
+# For strategy development only
+from .datatypes import SignalIntent, SignalType, SignalStrength, StrategyConfig
+from .registry import BaseStrategy
+
 
 __all__ = [
+    # Main API for orchestrator
     'generate_signals',
-    'register_strategy', 
-    'list_strategies',
+    'get_available_strategies', 
+    'clear_cooldowns',
+    'get_watchlist',
+    'get_symbol_strategies',
+    'get_strategy_timeframe',
+    'get_symbol_strategy_pairs',
+    'update_strategy_config',
+    
+    # For strategy development
     'SignalIntent',
-    'SignalType',
+    'SignalType', 
     'SignalStrength',
-    'MomentumStrategy',
-    'EMAFilter',
-    'VolatilityRegimeFilter'
+    'StrategyConfig',
+    'BaseStrategy'
 ]
-
-__version__ = '1.0.0'

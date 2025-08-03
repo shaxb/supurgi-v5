@@ -48,6 +48,15 @@ class BaseStrategy(ABC):
         """Get parameter value with default."""
         return self.parameters.get(key, default)
     
+    def get_cooldown(self) -> int:
+        """
+        Get strategy cooldown in minutes.
+        
+        Returns:
+            Cooldown period in minutes (0 = no cooldown)
+        """
+        return self.get_parameter('cooldown_minutes', 5)  # Default 5 minutes
+    
     def validate_data(self, data) -> bool:
         """
         Validate input data format.
