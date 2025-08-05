@@ -57,3 +57,4 @@ def run_orchestrator():
 if __name__ == "__main__":
     # For testing orchestrator directly
     run_orchestrator()
+    logger.error("Restarting orchestrator loop...")

@@ -39,7 +39,7 @@ def load_symbols() -> Dict[str, Dict[str, Any]]:
         logger.error(f"Failed to load symbols config: {e}")
         return {}
 
-
+# returns symbols.yaml config got api -> 
 def get_strategy_config(symbol: str, strategy_instance: str) -> Dict[str, Any]:
     """Get strategy-specific config for symbol (excluding timeframe)."""
     symbols_config = load_symbols()
@@ -51,7 +51,8 @@ def get_strategy_config(symbol: str, strategy_instance: str) -> Dict[str, Any]:
     strategy_config.pop('timeframe', None)
     return strategy_config
 
-
+# for main orchestrator loop
+# Returns list of (symbol, strategy_instance, timeframe) tuples
 def get_symbol_strategy_pairs() -> List[tuple]:
     """Get all active (symbol, strategy_instance, timeframe) tuples for orchestrator loop."""
     pairs = []

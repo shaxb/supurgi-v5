@@ -22,7 +22,7 @@ MSFT:
       cooldown_minutes: 15
 
 TSLA:
-  active: false  # Disabled
+  active: true  # Disabled
   strategies:
     momentum_H1:
       timeframe: "H1"

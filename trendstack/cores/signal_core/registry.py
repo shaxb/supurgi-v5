@@ -1,12 +1,11 @@
 """
-Strategy Registry - Plugin Manager
+Strategy Registry - Simple Plugin Manager
 
 Manages registration and discovery of signal generation strategies.
 """
 
 from typing import Dict, Type, List, Optional, Any
 from abc import ABC, abstractmethod
-import inspect
 from loguru import logger
 
 from .datatypes import SignalIntent, StrategyConfig
@@ -85,15 +84,10 @@ class BaseStrategy(ABC):
 
 
 class StrategyRegistry:
-    """
-    Registry for managing signal generation strategies.
-    
-    Provides plugin-like functionality for strategy discovery and instantiation.
-    """
+    """Simple registry for managing signal generation strategies."""
     
     def __init__(self):
         self._strategies: Dict[str, Type[BaseStrategy]] = {}
-        self._metadata: Dict[str, Dict[str, Any]] = {}
     
     def register(self, name: str, strategy_class: Type[BaseStrategy]) -> None:
         """
@@ -104,7 +98,7 @@ class StrategyRegistry:
             strategy_class: Strategy class inheriting from BaseStrategy
             
         Raises:
-            ValueError: If strategy is invalid or name already exists
+            ValueError: If strategy is invalid
         """
         # Validate strategy class
         if not issubclass(strategy_class, BaseStrategy):
@@ -119,10 +113,6 @@ class StrategyRegistry:
         
         # Register strategy
         self._strategies[name] = strategy_class
-        
-        # Extract metadata
-        self._metadata[name] = self._extract_metadata(strategy_class)
-        
         logger.debug(f"Registered strategy: {name}")
     
     def get_strategy(self, name: str) -> Optional[Type[BaseStrategy]]:
@@ -145,120 +135,3 @@ class StrategyRegistry:
             List of strategy names
         """
         return list(self._strategies.keys())
-    
-    def unregister(self, name: str) -> bool:
-        """
-        Remove strategy from registry.
-        
-        Args:
-            name: Strategy name
-            
-        Returns:
-            True if removed, False if not found
-        """
-        if name in self._strategies:
-            del self._strategies[name]
-            del self._metadata[name]
-            logger.debug(f"Unregistered strategy: {name}")
-            return True
-        return False
-    
-    def get_strategy_info(self, name: str) -> Optional[Dict[str, Any]]:
-        """
-        Get metadata about a strategy.
-        
-        Args:
-            name: Strategy name
-            
-        Returns:
-            Dictionary with strategy metadata or None
-        """
-        return self._metadata.get(name)
-    
-    def clear(self) -> None:
-        """Clear all registered strategies."""
-        self._strategies.clear()
-        self._metadata.clear()
-        logger.debug("Cleared all strategies from registry")
-    
-    def _extract_metadata(self, strategy_class: Type[BaseStrategy]) -> Dict[str, Any]:
-        """
-        Extract metadata from strategy class.
-        
-        Args:
-            strategy_class: Strategy class
-            
-        Returns:
-            Dictionary with metadata
-        """
-        metadata = {
-            'class_name': strategy_class.__name__,
-            'module': strategy_class.__module__,
-            'docstring': strategy_class.__doc__ or "No description available",
-            'parameters': []
-        }
-        
-        # Try to extract parameter information from __init__ signature
-        try:
-            init_signature = inspect.signature(strategy_class.__init__)
-            for param_name, param in init_signature.parameters.items():
-                if param_name not in ['self', 'config']:
-                    metadata['parameters'].append({
-                        'name': param_name,
-                        'default': param.default if param.default != inspect.Parameter.empty else None,
-                        'annotation': str(param.annotation) if param.annotation != inspect.Parameter.empty else None
-                    })
-        except Exception as e:
-            logger.debug(f"Could not extract parameters for {strategy_class.__name__}: {e}")
-        
-        return metadata
-    
-    def auto_discover(self, module_path: str) -> int:
-        """
-        Automatically discover and register strategies from a module.
-        
-        Args:
-            module_path: Python module path to scan
-            
-        Returns:
-            Number of strategies discovered and registered
-        """
-        try:
-            import importlib
-            module = importlib.import_module(module_path)
-            
-            discovered = 0
-            for attr_name in dir(module):
-                attr = getattr(module, attr_name)
-                
-                # Check if it's a strategy class
-                if (inspect.isclass(attr) and 
-                    issubclass(attr, BaseStrategy) and 
-                    attr != BaseStrategy):
-                    
-                    # Use class name as strategy name (convert to lowercase)
-                    strategy_name = attr_name.lower().replace('strategy', '')
-                    
-                    try:
-                        self.register(strategy_name, attr)
-                        discovered += 1
-                    except Exception as e:
-                        logger.warning(f"Failed to register {attr_name}: {e}")
-            
-            logger.info(f"Auto-discovered {discovered} strategies from {module_path}")
-            return discovered
-            
-        except Exception as e:
-            logger.error(f"Failed to auto-discover strategies from {module_path}: {e}")
-            return 0
-    
-    def __len__(self) -> int:
-        """Return number of registered strategies."""
-        return len(self._strategies)
-    
-    def __contains__(self, name: str) -> bool:
-        """Check if strategy is registered."""
-        return name in self._strategies
-    
-    def __repr__(self) -> str:
-        return f"StrategyRegistry({len(self._strategies)} strategies)"

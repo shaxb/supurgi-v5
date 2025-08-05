@@ -10,8 +10,6 @@ def update_all_symbols():
     """Update all symbols with latest data."""
     symbols = list(get_symbol_mapping().keys())
     
-    logger.info(f"Starting update for {len(symbols)} symbols")
-    
     for symbol in symbols:
         try:
             refresh_data(symbol)

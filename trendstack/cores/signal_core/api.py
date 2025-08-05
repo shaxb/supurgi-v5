@@ -96,7 +96,7 @@ def _update_cooldown(strategy: str, symbol: str, cooldown_minutes: int):
 
 def get_available_strategies() -> List[str]:
     """Get list of available strategy names."""
-    return [info['name'] for info in _strategy_registry.list_strategies()]
+    return _strategy_registry.list_strategies()
 
 
 def clear_cooldowns():

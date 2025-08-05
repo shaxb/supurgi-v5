@@ -29,8 +29,7 @@ def download_raw_data(symbol: str, frame: str = "D", period: str = "5y", start: 
         # Remove timezone for simplicity
         if hasattr(data.index, 'tz') and data.index.tz is not None:
             data.index = data.index.tz_localize(None)
-        
-        logger.info(f"Downloaded {len(data)} bars for {symbol} ({frame})")
+            
         return data
         
     except Exception as e:

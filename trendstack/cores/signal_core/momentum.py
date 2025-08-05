@@ -41,6 +41,8 @@ class MomentumStrategy(BaseStrategy):
         if not self.validate_data(data):
             return None
 
+        logger.error(self.config)
+
         try:
             # Simple test: generate BUY signal if last close > previous close
             if len(data) < 2:
@@ -93,7 +95,5 @@ def register_momentum_strategy():
         # Registry not available yet, will be registered later
         pass
 
-# Auto-register when imported
-register_momentum_strategy()
 # Auto-register when imported
 register_momentum_strategy()
