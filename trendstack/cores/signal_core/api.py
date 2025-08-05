@@ -62,14 +62,13 @@ def generate_signals(
         
         # Initialize and run strategy
         strategy_instance_obj = strategy_class(strategy_config)
-        signals = strategy_instance_obj.generate_signals(data, symbol)
+        signal = strategy_instance_obj.generate_signals(data, symbol)
         
-        # Return only the latest signal (if any)
-        if signals:
-            latest_signal = signals[-1]  # Get newest signal
+        # Return the signal if generated
+        if signal:
             _update_cooldown(strategy_instance, symbol, strategy_instance_obj.get_cooldown())
             logger.debug(f"Generated signal for {symbol} using {strategy_instance}")
-            return latest_signal
+            return signal
         
         return None
         
@@ -107,4 +106,4 @@ def clear_cooldowns():
 
 
 # Expose symbols functions for orchestrator
-from .symbols import get_watchlist, get_symbol_strategies, get_strategy_timeframe, get_symbol_strategy_pairs, update_strategy_config
+from .symbols import get_symbol_strategy_pairs, update_strategy_config

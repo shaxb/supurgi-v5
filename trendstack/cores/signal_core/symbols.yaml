@@ -2,7 +2,7 @@
 # Format: symbol -> strategies -> strategy config with timeframe
 
 AAPL:
-  active: true
+  active: false
   strategies:
     momentum_H4:
       timeframe: "H4"
@@ -14,7 +14,7 @@ AAPL:
       cooldown_minutes: 60
 
 MSFT:
-  active: true
+  active: true  # Disabled
   strategies:
     momentum_H4:
       timeframe: "H4"
@@ -22,7 +22,7 @@ MSFT:
       cooldown_minutes: 15
 
 TSLA:
-  active: true
+  active: false  # Disabled
   strategies:
     momentum_H1:
       timeframe: "H1"
@@ -34,7 +34,7 @@ TSLA:
       cooldown_minutes: 10
 
 EURUSD:
-  active: true
+  active: false  # Disabled
   strategies:
     momentum_H4:
       timeframe: "H4"
@@ -54,7 +54,7 @@ GBPUSD:
       cooldown_minutes: 30
 
 SPY:
-  active: true
+  active: false  # Disabled
   strategies:
     momentum_D:
       timeframe: "D"

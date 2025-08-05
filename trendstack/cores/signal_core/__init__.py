@@ -9,7 +9,7 @@ Main API:
 from . import momentum
 
 # Public API - only expose what orchestrator needs
-from .api import generate_signals, get_available_strategies, clear_cooldowns, get_watchlist, get_symbol_strategies, get_strategy_timeframe, get_symbol_strategy_pairs, update_strategy_config
+from .api import generate_signals, get_available_strategies, clear_cooldowns, get_symbol_strategy_pairs, update_strategy_config
 
 # For strategy development only
 from .datatypes import SignalIntent, SignalType, SignalStrength, StrategyConfig
@@ -21,9 +21,6 @@ __all__ = [
     'generate_signals',
     'get_available_strategies', 
     'clear_cooldowns',
-    'get_watchlist',
-    'get_symbol_strategies',
-    'get_strategy_timeframe',
     'get_symbol_strategy_pairs',
     'update_strategy_config',
     

@@ -26,38 +26,25 @@ def load_symbols() -> Dict[str, Dict[str, Any]]:
         return {}
 
 
-def get_watchlist() -> List[str]:
-    """Get list of active symbols for orchestrator."""
-    symbols_config = load_symbols()
-    return [symbol for symbol, config in symbols_config.items() 
-            if config.get('active', True)]
-
-
-def get_symbol_config(symbol: str) -> Dict[str, Any]:
-    """Get configuration for specific symbol."""
-    symbols_config = load_symbols()
-    return symbols_config.get(symbol, {})
-
-
-def get_symbol_strategies(symbol: str) -> List[str]:
-    """Get strategy instances enabled for symbol."""
-    config = get_symbol_config(symbol)
-    strategies = config.get('strategies', {})
-    return list(strategies.keys())
-
-
-def get_strategy_timeframe(symbol: str, strategy_instance: str) -> str:
-    """Get timeframe for specific strategy instance."""
-    config = get_symbol_config(symbol)
-    strategies = config.get('strategies', {})
-    strategy_config = strategies.get(strategy_instance, {})
-    return strategy_config.get('timeframe', 'H4')
+def load_symbols() -> Dict[str, Dict[str, Any]]:
+    """Load symbols configuration from YAML."""
+    try:
+        if SYMBOLS_CONFIG_PATH.exists():
+            with open(SYMBOLS_CONFIG_PATH, 'r') as f:
+                return yaml.safe_load(f) or {}
+        else:
+            logger.warning(f"Symbols config not found: {SYMBOLS_CONFIG_PATH}")
+            return {}
+    except Exception as e:
+        logger.error(f"Failed to load symbols config: {e}")
+        return {}
 
 
 def get_strategy_config(symbol: str, strategy_instance: str) -> Dict[str, Any]:
     """Get strategy-specific config for symbol (excluding timeframe)."""
-    config = get_symbol_config(symbol)
-    strategies = config.get('strategies', {})
+    symbols_config = load_symbols()
+    symbol_config = symbols_config.get(symbol, {})
+    strategies = symbol_config.get('strategies', {})
     strategy_config = strategies.get(strategy_instance, {}).copy()
     
     # Remove timeframe from strategy config (it's used by orchestrator for data loading)

@@ -54,63 +54,6 @@ def simple_orchestrator_loop():
             print(f"  No signal (cooldown or conditions not met)")
 
 
-def traditional_orchestrator_loop():
-    """
-    Alternative: traditional nested loop approach.
-    """
-    print("\n=== Traditional Nested Loop Approach ===")
-    
-    for symbol in get_watchlist():
-        print(f"\n--- Processing {symbol} ---")
-        
-        for strategy_instance in get_symbol_strategies(symbol):
-            timeframe = get_strategy_timeframe(symbol, strategy_instance)
-            print(f"  {strategy_instance} ({timeframe})")
-            
-            # data = data_core.load_prices(symbol, timeframe)
-            data = create_sample_data()
-            
-            signal = generate_signals(data, symbol, strategy_instance)
-            if signal:
-                print(f"    Generated signal: {signal.signal_type.value}")
-            else:
-                print(f"    No signal")
-
-
-def show_optimizer_example():
-    """
-    Show how optimizer can update symbols.yaml directly.
-    """
-    print("\n=== Optimizer Example ===")
-    print("Optimizer can update symbols.yaml directly:")
-    
-    # Example: Optimizer found better RSI period for AAPL momentum_H4
-    print("\nBefore optimization: AAPL momentum_H4 uses default config")
-    
-    # Optimizer updates the configuration
-    new_config = {
-        'rsi_period': 12,  # Optimized value
-        'cooldown_minutes': 25  # Optimized cooldown
-    }
-    
-    success = update_strategy_config('AAPL', 'momentum_H4', new_config)
-    
-    if success:
-        print("✅ Configuration updated in symbols.yaml")
-        print("   Next orchestrator run will use new parameters automatically")
-        print("   No code changes needed - just update the YAML!")
-    else:
-        print("❌ Configuration update failed")
-    
-    print("\nOptimizer workflow:")
-    print("1. Optimizer tests different parameters")
-    print("2. Finds best performing config")
-    print("3. Updates symbols.yaml directly")
-    print("4. Orchestrator automatically uses new config")
-    print("5. No complex runtime overrides needed!")
-
-
 if __name__ == "__main__":
-    show_optimizer_example()
     simple_orchestrator_loop()
-    traditional_orchestrator_loop()
+    # traditional_orchestrator_loop()

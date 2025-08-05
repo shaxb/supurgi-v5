@@ -31,16 +31,16 @@ class BaseStrategy(ABC):
         self.parameters = config.parameters
     
     @abstractmethod
-    def generate_signals(self, data, symbol: str) -> List[SignalIntent]:
+    def generate_signals(self, data, symbol: str) -> Optional[SignalIntent]:
         """
-        Generate trading signals from market data.
+        Generate trading signal from market data.
         
         Args:
             data: OHLCV DataFrame with columns ['open', 'high', 'low', 'close', 'volume']
             symbol: Symbol identifier
             
         Returns:
-            List of SignalIntent objects
+            Single SignalIntent object or None if no signal
         """
         pass
     
