@@ -1,99 +1,84 @@
 """
-Position management for backtesting
+Simple position management
 """
 
 from datetime import datetime
-from typing import Optional
 from loguru import logger
 
 from ..signal_core.datatypes import SignalIntent, SignalType
 
 
 class Position:
-    """Simple position with SL/TP management."""
+    """Simple position with SL/TP."""
     
-    def __init__(self, signal: SignalIntent, position_size: float, margin_required: float):
-        # Basic position info
+    def __init__(self, signal: SignalIntent, size: float, margin: float):
         self.symbol = signal.symbol
         self.signal_type = signal.signal_type
         self.entry_price = signal.price
-        self.position_size = position_size
-        self.margin_required = margin_required
+        self.size = size
+        self.margin = margin
         self.open_time = signal.timestamp
         
         # SL/TP from signal
         self.stop_loss = signal.stop_loss
         self.take_profit = signal.take_profit
         
-        # P&L tracking
+        # P&L
         self.unrealized_pnl = 0.0
         self.realized_pnl = 0.0
         
         # Status
-        self.is_open = True
+        self.is_closed = False
         self.close_reason = None
         self.close_time = None
         self.close_price = None
         
-        logger.info(f"Position opened: {self.symbol} {signal.signal_type.value} at {self.entry_price:.2f}")
+        logger.info(f"{self.symbol} {signal.signal_type.value} opened at {self.entry_price}")
     
-    def update_pnl(self, current_price: float):
-        """Update unrealized P&L based on current price."""
-        if not self.is_open:
+    def update_pnl(self, current_price):
+        """Update unrealized P&L."""
+        if self.is_closed:
             return
             
-        if self.signal_type == SignalType.BUY:
-            self.unrealized_pnl = (current_price - self.entry_price) * self.position_size
-        elif self.signal_type == SignalType.SELL:
-            self.unrealized_pnl = (self.entry_price - current_price) * self.position_size
+        price_diff = current_price - self.entry_price
+        if self.signal_type == SignalType.SELL:
+            price_diff = -price_diff
+            
+        self.unrealized_pnl = price_diff * abs(self.size)
     
-    def check_exit_conditions(self, bar_high: float, bar_low: float, bar_close: float) -> Optional[tuple]:
-        """
-        Check if SL or TP should be hit during this bar.
-        
-        Returns:
-            (exit_price, exit_reason) if position should close, None otherwise
-        """
-        if not self.is_open:
-            return None
-        
+    def should_close(self, current_price):
+        """Check if position should close due to SL/TP."""
+        if self.is_closed:
+            return False, None
+            
         if self.signal_type == SignalType.BUY:
-            # Long position: check if low hit SL or high hit TP
-            if self.stop_loss and bar_low <= self.stop_loss:
-                return (self.stop_loss, "Stop Loss")
-            elif self.take_profit and bar_high >= self.take_profit:
-                return (self.take_profit, "Take Profit")
-                
-        elif self.signal_type == SignalType.SELL:
-            # Short position: check if high hit SL or low hit TP  
-            if self.stop_loss and bar_high >= self.stop_loss:
-                return (self.stop_loss, "Stop Loss")
-            elif self.take_profit and bar_low <= self.take_profit:
-                return (self.take_profit, "Take Profit")
+            if self.stop_loss and current_price <= self.stop_loss:
+                return True, "SL"
+            if self.take_profit and current_price >= self.take_profit:
+                return True, "TP"
+        else:  # SELL
+            if self.stop_loss and current_price >= self.stop_loss:
+                return True, "SL"
+            if self.take_profit and current_price <= self.take_profit:
+                return True, "TP"
         
-        return None
+        return False, None
     
-    def close(self, close_price: float, close_reason: str, close_time: datetime):
-        """Close the position and calculate realized P&L."""
-        if not self.is_open:
+    def close(self, price, timestamp, reason="Manual"):
+        """Close the position."""
+        if self.is_closed:
             return
             
-        self.is_open = False
-        self.close_price = close_price
-        self.close_reason = close_reason
-        self.close_time = close_time
+        self.close_price = price
+        self.close_time = timestamp
+        self.close_reason = reason
+        self.is_closed = True
         
-        # Calculate final realized P&L
-        if self.signal_type == SignalType.BUY:
-            self.realized_pnl = (close_price - self.entry_price) * self.position_size
-        elif self.signal_type == SignalType.SELL:
-            self.realized_pnl = (self.entry_price - close_price) * self.position_size
+        # Calculate realized P&L
+        price_diff = price - self.entry_price
+        if self.signal_type == SignalType.SELL:
+            price_diff = -price_diff
             
-        self.unrealized_pnl = 0.0  # No longer unrealized
+        self.realized_pnl = price_diff * abs(self.size)
         
-        logger.info(f"Position closed: {self.symbol} at {close_price:.2f} ({close_reason}) - P&L: {self.realized_pnl:.2f}")
-    
-    def __str__(self):
-        status = "OPEN" if self.is_open else "CLOSED"
-        pnl = self.unrealized_pnl if self.is_open else self.realized_pnl
-        return f"Position({self.symbol} {self.signal_type.value} @ {self.entry_price:.2f} - {status} P&L: {pnl:.2f})"
+        logger.info(f"{self.symbol} closed at {price} ({reason}): P&L=${self.realized_pnl:.2f}")

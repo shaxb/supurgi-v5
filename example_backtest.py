@@ -1,28 +1,24 @@
 """
-Example usage of the broker backtesting engine
+Clean, simple backtest example
 """
 
-from trendstack.cores.backtest_core import BrokerEngine
+from trendstack.cores.backtest_core.engine import BrokerEngine
+from loguru import logger
 
 def run_example_backtest():
-    """Simple example of running a backtest."""
+    """Run the simplified backtest."""
     
-    # Create engine from config
-    engine = BrokerEngine.from_config('trendstack/cores/backtest_core/backtest_config.yaml')
+    # Create self-initializing engine
+    engine = BrokerEngine()
     
-    # Run backtest
+    # Run backtest (everything is self-contained)
     results = engine.run_backtest()
     
-    # Results are automatically printed, but you can also:
-    print("\nTrade Details:")
-    trades_df = results.to_dataframe()
-    if not trades_df.empty:
-        print(trades_df.head(10))
+    # Optional: Show trade details
+    if results.trades:
+        logger.info(f"First trade: {results.trades[0]}")
     
-    print(f"\nFinal Summary:")
-    summary = results.get_summary()
-    for key, value in summary.items():
-        print(f"{key}: {value}")
+    return results
 
 if __name__ == "__main__":
     run_example_backtest()

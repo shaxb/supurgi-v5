@@ -1,13 +1,10 @@
 """
-Backtest Core - Broker-like simulation engine
+Simplified Backtest Core
 
-Main API:
-    BrokerEngine - Realistic broker simulation with margin, SL/TP, position sizing
+Clean, self-initializing broker simulation
 """
 
 from .engine import BrokerEngine
-from .account import BrokerAccount  
-from .position import Position
 from .results import BacktestResults
 
 __all__ = [

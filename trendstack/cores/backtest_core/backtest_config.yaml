@@ -1,49 +1,16 @@
-# Backtest Configuration File
+# Minimal Backtest Configuration
 backtest:
   period:
     start: "2023-01-01"
     end: "2024-01-01"
-  strategies:
-    - momentum
-  symbols:
-    - AAPL
-    - TSLA
-  timeframe: H4
+
+  symbols: [AAPL, MSFT, SPY, TSLA]
+
+  strategies: [momentum_H4, momentum_H1]
+  
   account:
     initial_deposit: 10000.0
     leverage: 100
-    currency: USD
-  position_sizing:
-    method: "risk_pct"
+  
+  risk:
     risk_per_trade_pct: 2.0
-    max_position_size: 1000
-  risk:
-    max_concurrent_positions: 10
-    daily_loss_limit_pct: 5.0
-    max_drawdown_pct: 15.0
-    margin_call_level: 100.0
-    stop_out_level: 50.0
-  costs:
-    commission_per_trade: 7.0
-    slippage_pips: 1
-  position_sizing:
-    method: "risk_pct"
-    risk_per_trade_pct: 2.0
-    max_position_size: 1000
-    
-  risk:
-  risk:
-    max_concurrent_positions: 10
-    daily_loss_limit_pct: 5.0
-    max_drawdown_pct: 15.0
-    margin_call_level: 100.0
-    stop_out_level: 50.0
-    
-  costs:
-  costs:
-    commission_per_trade: 7.0
-    slippage_pips: 1
-    
-# Usage example:
-# engine = BrokerEngine.from_config('backtest_config.yaml')
-# results = engine.run_backtest()
