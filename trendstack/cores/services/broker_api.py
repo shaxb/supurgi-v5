@@ -1,49 +1,42 @@
 """
-BrokerAPI - Global broker abstraction
+MT5-compatible BrokerAPI - Simple global broker that mimics MetaTrader 5
 """
-
-from typing import List, Dict, Any
 
 
 class BrokerAPI:
-    """Simple global broker API - can connect to real or fake broker"""
+    """Global broker API that mimics MT5's interface - simple but effective"""
     
     _broker = None
     
     @staticmethod
-    def get_balance():
-        """Get account balance"""
-        if BrokerAPI._broker:
-            return BrokerAPI._broker.get_balance()
-        return 0.0
+    def set_broker(broker):
+        """Set the broker implementation (MT5 or backtest)"""
+        BrokerAPI._broker = broker
     
     @staticmethod
-    def get_positions():
-        """Get current positions"""
+    def account_info():
+        """Get account info - mimics mt5.account_info()"""
         if BrokerAPI._broker:
-            return BrokerAPI._broker.get_positions()
+            return BrokerAPI._broker.account_info()
+        return None
+    
+    @staticmethod
+    def positions_get(symbol=None):
+        """Get positions - mimics mt5.positions_get()"""
+        if BrokerAPI._broker:
+            return BrokerAPI._broker.positions_get(symbol)
         return []
     
     @staticmethod
-    def place_order(symbol: str, size: float, order_type: str = "market"):
-        """Place an order"""
+    def order_send(request):
+        """Send order - mimics mt5.order_send()"""
         if BrokerAPI._broker:
-            return BrokerAPI._broker.place_order(symbol, size, order_type)
+            return BrokerAPI._broker.order_send(request)
         return None
     
     @staticmethod
-    def close_position(position_id: str):
-        """Close a position"""
+    def orders_get():
+        """Get pending orders - mimics mt5.orders_get()"""  
         if BrokerAPI._broker:
-            return BrokerAPI._broker.close_position(position_id)
-        return None
-    
-    @staticmethod
-    def set_broker(broker):
-        """Set the broker implementation"""
-        BrokerAPI._broker = broker
-        
-    @staticmethod
-    def is_connected():
-        """Check if broker is connected"""
-        return BrokerAPI._broker is not None
+            return BrokerAPI._broker.orders_get()
+        return []
